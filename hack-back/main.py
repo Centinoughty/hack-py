@@ -18,9 +18,6 @@ genai.configure(api_key=API_KEY)
 
 app = FastAPI()
 
-# Load the pre-trained model and tokenizer
-qa_pipeline = pipeline("question-answering", model=MODEL_NAME)
-
 def extract_text_from_pdf(file_path):
     """Extract text from a PDF file."""
     try:
@@ -41,19 +38,6 @@ async def upload_pdf(file: UploadFile = File(...)):
             tmp_file.write(file.file.read())
             text = extract_text_from_pdf(tmp_file.name)
         return JSONResponse(content={"text": text})
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
-
-@app.post("/ask")
-async def ask_question(context: str, question: str):
-    """Ask a question based on the uploaded content."""
-    if not context or not question:
-        raise HTTPException(status_code=400, detail="Context and question must be provided.")
-    
-    try:
-        # Use the local QA pipeline
-        answer = qa_pipeline({"context": context, "question": question})
-        return JSONResponse(content=answer)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
