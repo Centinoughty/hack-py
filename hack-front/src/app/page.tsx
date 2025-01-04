@@ -31,21 +31,12 @@ export default function Home() {
     let askedQuestion = question;
     let response;
     try {
-      response = await fetch("https://api.openai.com/v1/chat/completions", {
+      response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/ask-genai`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_KEY}`,
         },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [
-            { role: "system", content: "You are a helpful assistant" },
-            { role: "user", content: askedQuestion },
-          ],
-          max_tokens: 150,
-          temperature: 0.7,
-        }),
+        body: JSON.stringify({ prompt: question }),
       });
 
       const data = await response?.json();
@@ -54,7 +45,7 @@ export default function Home() {
         ...questions,
         {
           question: question.trim(),
-          response: "data.choices[0].message.content",
+          response: data.choices[0].message.content,
         },
       ]);
     } catch (error) {

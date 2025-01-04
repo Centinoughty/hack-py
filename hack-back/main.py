@@ -18,6 +18,8 @@ genai.configure(api_key=API_KEY)
 
 app = FastAPI()
 
+app.add_middleware()
+
 def extract_text_from_pdf(file_path):
     """Extract text from a PDF file."""
     try:
