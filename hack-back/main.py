@@ -1,6 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
-from transformers import pipeline, AutoTokenizer, AutoModelForQuestionAnswering
+from transformers import pipeline
 import uvicorn
 import os
 import tempfile
@@ -64,7 +64,7 @@ async def ask_genai_question(prompt: str):
         raise HTTPException(status_code=400, detail="Prompt must be provided.")
     
     try:
-        model = genai.GenerativeModel("tunedModels/new-model-c50jxzneqh5l")
+        model = genai.GenerativeModel(MODEL_NAME)
         response = model.generate_content(prompt)
         return JSONResponse(content={"response": response.text})
     except Exception as e:
