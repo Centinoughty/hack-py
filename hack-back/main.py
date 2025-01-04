@@ -1,6 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
-from transformers import pipeline, AutoTokenizer, AutoModelForQuestionAnswering
 import uvicorn
 import os
 import tempfile
@@ -17,9 +16,6 @@ MODEL_NAME = os.getenv("MODELNAME")
 genai.configure(api_key=API_KEY)
 
 app = FastAPI()
-
-# Load the pre-trained model and tokenizer
-qa_pipeline = pipeline("question-answering", model=MODEL_NAME)
 
 def extract_text_from_pdf(file_path):
     """Extract text from a PDF file."""
@@ -44,19 +40,6 @@ async def upload_pdf(file: UploadFile = File(...)):
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-@app.post("/ask")
-async def ask_question(context: str, question: str):
-    """Ask a question based on the uploaded content."""
-    if not context or not question:
-        raise HTTPException(status_code=400, detail="Context and question must be provided.")
-    
-    try:
-        # Use the local QA pipeline
-        answer = qa_pipeline({"context": context, "question": question})
-        return JSONResponse(content=answer)
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
-
 @app.post("/ask-genai")
 async def ask_genai_question(prompt: str):
     """Ask a question using Google Generative AI."""
@@ -64,7 +47,7 @@ async def ask_genai_question(prompt: str):
         raise HTTPException(status_code=400, detail="Prompt must be provided.")
     
     try:
-        model = genai.GenerativeModel("tunedModels/new-model-c50jxzneqh5l")
+        model = genai.GenerativeModel(MODEL_NAME)
         response = model.generate_content(prompt)
         return JSONResponse(content={"response": response.text})
     except Exception as e:
